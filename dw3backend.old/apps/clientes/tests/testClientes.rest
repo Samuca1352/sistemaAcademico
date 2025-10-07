@@ -1,0 +1,60 @@
+### Necessário para pegar o token
+# @name loginAutenticado
+POST http://localhost:40000/Login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "qwe",
+    "password": "qwe"
+}
+### Seta o token
+@accessToken = {{loginAutenticado.response.body.$.token}}
+
+### teste de buscar todos os clientes
+GET http://localhost:40000/GetAllClientes HTTP/1.1 
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+### teste de buscar cliente por ID
+POST http://localhost:40000/GetClienteByID HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "clienteid": 1
+}
+
+### teste de inserção de cliente
+POST http://localhost:40000/InsertClientes HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "codigo": "CLI04",
+    "nome": "Beatriz Costa",
+    "endereco": "Rua D4",
+    "ativo": true
+}
+
+### teste de atualização de cliente
+POST http://localhost:40000/UpdateClientes HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "clienteid": 1,
+    "codigo": "CLI01-EDITADO",
+    "nome": "João da Silva Alterado",
+    "endereco": "Rua A1 Nova",
+    "ativo": false
+}
+
+### teste de remoção de cliente
+POST http://localhost:40000/DeleteClientes HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "clienteid": 2
+}
+

@@ -1,0 +1,60 @@
+### Necessário para pegar o token
+# @name loginAutenticado
+POST http://localhost:40000/Login HTTP/1.1
+content-type: application/json
+
+{
+    "username": "qwe",
+    "password": "qwe"
+}
+### Seta o token
+@accessToken = {{loginAutenticado.response.body.$.token}}
+
+### teste de buscar todos os pedidos
+GET http://localhost:40000/GetAllPedidos HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+### teste de buscar pedido por ID
+POST http://localhost:40000/GetPedidoByID HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "pedidoid": 4
+}
+
+### teste de inserção de pedido
+POST http://localhost:40000/InsertPedidos HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "numero": 11,
+    "data": "2025-09-23",
+    "valortotal": 200,
+    "clienteid": 2
+}
+
+### teste de atualização de pedido
+POST http://localhost:40000/UpdatePedidos HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "pedidoid": 4,
+    "numero": 11,
+    "data": "2020-02-05",
+    "valortotal": 7500.50,
+    "clienteid": 2
+}
+
+### teste de remoção de pedido
+POST http://localhost:40000/DeletePedidos HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+    "pedidoid": 4
+}
+
