@@ -1,57 +1,66 @@
 const axios = require("axios");
 
 // Função para renderizar a página principal de manutenção de cursos
-const manutCursos = (req, res) => {
+const manutCursos = async (req, res) => {
   const token = req.session.token;
   const userName = req.session.userName;
-  axios
-    .post(process.env.SERVIDOR_DW3Back + "/getAllCursos", {
-      token,
-    })
-    .then((response) => {
-      // Sucesso
-      let resCursos = response.data;
-      res.render("cursos/view/vwManutCursos.njk", { // CORRIGIDO
-        title: "Manutenção de Cursos",
-        data: resCursos.registro,
-        userName: userName,
-      });
-    })
-    .catch((error) => {
-      // Erro
-      let resCursos = { registro: "" };
-      res.render("cursos/view/vwManutCursos.njk", { // CORRIGIDO
-        title: "Manutenção de Cursos",
-        data: resCursos.registro,
-        userName: userName,
-      });
+  try {
+    const response = await axios.get(process.env.SERVIDOR_DW3Back + "/GetAllCursos", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
     });
+    res.render("cursos/view/vwManutCursos.njk", {
+      title: "Manutenção de Cursos",
+      data: response.data.registro,
+      userName: userName,
+      erro: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.render("cursos/view/vwManutCursos.njk", {
+      title: "Manutenção de Cursos",
+      data: [],
+      userName: userName,
+      erro: error.message
+    });
+  }
 };
 
+
 // Função para exibir o formulário de inserção (GET) e para salvar (POST)
-const insertCursos = (req, res) => {
+const insertCursos = async (req, res) => {
   const token = req.session.token;
   const userName = req.session.userName;
-  if (req.method == "GET") {
-    res.render("cursos/view/vwFCrCursos.njk", { // CORRIGIDO
+  if (req.method === "GET") {
+    res.render("cursos/view/vwFCrCursos.njk", {
       title: "Cadastro de Cursos",
       userName: userName,
+      erro: null,
+      data: null
     });
   } else {
-    axios
-      .post(process.env.SERVIDOR_DW3Back + "/InsertCursos", {
-        descricao: req.body.descricao,
-        cargahoraria: req.body.cargahoraria,
-        periodo: req.body.periodo,
-        token: token,
-      })
-      .then(() => {
-        res.redirect("/cursos/ManutCursos");
-      })
-      .catch((error) => {
-        console.error(error);
-        res.redirect("/cursos/ManutCursos");
+    const cursoData = req.body;
+    try {
+      const response = await axios.post(process.env.SERVIDOR_DW3Back + "/InsertCursos", cursoData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
+      res.json({
+        status: response.data.status,
+        msg: "Curso inserido com sucesso!",
+        data: response.data
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: "Error",
+        msg: error.response ? error.response.data.msg : error.message,
+        data: error.response ? error.response.data : null
+      });
+    }
   }
 };
 
@@ -62,8 +71,7 @@ const ViewCursos = (req, res) => {
   axios
     .post(process.env.SERVIDOR_DW3Back + "/getCursoByID", {
       cursoid: req.params.id,
-      token: token,
-    })
+    }, { headers: { Authorization: `Bearer ${token}` } })
     .then((response) => {
       let curso = response.data;
       res.render("cursos/view/vwFRUDrCursos.njk", { // CORRIGIDO
@@ -87,8 +95,7 @@ const UpdateCurso = (req, res) => {
     axios
       .post(process.env.SERVIDOR_DW3Back + "/getCursoByID", {
         cursoid: req.params.id,
-        token: token,
-      })
+      }, { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => {
         let curso = response.data;
         res.render("cursos/view/vwFRUDrCursos.njk", { // CORRIGIDO
@@ -103,13 +110,9 @@ const UpdateCurso = (req, res) => {
       });
   } else {
     axios
-      .post(process.env.SERVIDOR_DW3Back + "/UpdateCursos", {
-        cursoid: req.body.cursoid,
-        descricao: req.body.descricao,
-        cargahoraria: req.body.cargahoraria,
-        periodo: req.body.periodo,
-        token: token,
-      })
+      .post(process.env.SERVIDOR_DW3Back + "/UpdateCursos", req.body,
+      { headers: { Authorization: `Bearer ${token}` } }
+      )
       .then(() => {
         res.redirect("/cursos/ManutCursos");
       })
@@ -124,10 +127,9 @@ const UpdateCurso = (req, res) => {
 const DeleteCurso = (req, res) => {
   const token = req.session.token;
   axios
-    .post(process.env.SERVIDOR_DW3Back + "/DeleteCursos", {
-      cursoid: req.body.cursoid,
-      token: token,
-    })
+    .post(process.env.SERVIDOR_DW3Back + "/DeleteCursos", req.body,
+    { headers: { Authorization: `Bearer ${token}` } }
+    )
     .then(() => {
       res.redirect("/cursos/ManutCursos");
     })
@@ -144,4 +146,3 @@ module.exports = {
   UpdateCurso,
   DeleteCurso,
 };
-
